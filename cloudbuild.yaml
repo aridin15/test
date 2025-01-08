@@ -1,0 +1,58 @@
+steps:
+  # Clean up unused Docker images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['image', 'prune', '-f']
+
+  # Build and push Docker image for Flask
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t',
+      'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/flask-app:$SHORT_SHA',
+      './flask-app'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/flask-app:$SHORT_SHA'
+    ]
+
+  # Build and push Docker image for Node.js
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t',
+      'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/node-app:$SHORT_SHA',
+      './node-app'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/node-app:$SHORT_SHA'
+    ]
+
+  # Replace PROJECT_ID and IMAGE_TAG in deployment files
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        sed -i 's|me-west1-docker.pkg.dev/PROJECT_ID/docker-repo/flask-app:IMAGE_TAG|'"'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/flask-app:$SHORT_SHA'"'|g' k8s/flask-deployment.yaml
+        sed -i 's|me-west1-docker.pkg.dev/PROJECT_ID/docker-repo/node-app:IMAGE_TAG|'"'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/node-app:$SHORT_SHA'"'|g' k8s/nodejs-deployment.yaml
+
+  # Deploy resources to the cluster using ADC
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: ['apply', '-f', 'k8s/']
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=me-west1'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=test'
+      - 'CLOUDSDK_CORE_PROJECT=$PROJECT_ID'
+      - 'CLOUDSDK_CONTAINER_USE_APPLICATION_DEFAULT_CREDENTIALS=true'
+
+images:
+  - 'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/flask-app:$SHORT_SHA'
+  - 'me-west1-docker.pkg.dev/$PROJECT_ID/docker-repo/node-app:$SHORT_SHA'
+
+options:
+  substitution_option: 'ALLOW_LOOSE' # Allow use of undefined variables
+  logging: CLOUD_LOGGING_ONLY

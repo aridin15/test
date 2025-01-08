@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flask-ingress
+  annotations:
+    networking.gke.io/managed-certificates: "multi-cert"
+    networking.gke.io/ingress.class: "gce"  # Specify GCE Ingress
+    networking.gke.io/allow-http: "false"   # Disable HTTP
+spec:
+  rules:
+    - host: flask.node.com
+      http:
+        paths:
+          - path: /api/flask
+            pathType: Prefix
+            backend:
+              service:
+                name: flask-service
+                port:
+                  number: 5000

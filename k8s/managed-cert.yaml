@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: multi-cert
+spec:
+  domains:
+    - node.cantaio.com
+    - flask.cantaio.com

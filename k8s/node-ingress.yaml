@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: node-ingress
+  annotations:
+    networking.gke.io/managed-certificates: "multi-cert"
+    networking.gke.io/ingress.class: "gce"  # Specify GCE Ingress
+    networking.gke.io/allow-http: "false"   # Disable HTTP
+
+spec:
+  rules:
+    - host: node.cantaio.com
+      http:
+        paths:
+          - path: /api/node
+            pathType: Prefix
+            backend:
+              service:
+                name: nodejs-service
+                port:
+                  number: 3000
+          - path: /api/fetch
+            pathType: Prefix
+            backend:
+              service:
+                name: nodejs-service
+                port:
+                  number: 3000

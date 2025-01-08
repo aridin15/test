@@ -1,0 +1,10 @@
+version: '3'
+services:
+  flask-app:
+    build: ./flask-app
+    ports:
+      - "5000:5000"
+  node-app:
+    build: ./node-app
+    ports:
+      - "3000:3000"

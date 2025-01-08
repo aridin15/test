@@ -1,0 +1,4 @@
+flask
+pymongo
+requests
+google-cloud-secret-manager

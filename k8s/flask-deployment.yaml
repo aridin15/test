@@ -1,0 +1,27 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: flask
+        version: blue
+    spec:
+#      serviceAccountName: sa-apps
+      containers:
+      - name: flask
+        image: me-west1-docker.pkg.dev/cantaio-dev/docker-repo/flask-app:IMAGE_TAG
+        ports:
+        - containerPort: 5000
+        imagePullPolicy: Always
+
+
+

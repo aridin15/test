@@ -1,0 +1,28 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node
+  template:
+    metadata:
+      labels:
+        app: node
+    spec:
+      serviceAccountName: sa-apps
+      containers:
+      - name: node
+        image: me-west1-docker.pkg.dev/cantaio-dev/docker-repo/node-app:IMAGE_TAG
+        ports:
+        - containerPort: 3000
+        imagePullPolicy: Always
+        env:
+        - name: FLASK_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: node-configmap
+              key: FLASK_API_URL
